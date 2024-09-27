@@ -87,7 +87,7 @@ def dados():
     xata = st.connection('xata',type=XataConnection)
 
     xquery = colunas + f' FROM "SSPDados" where (6371 * acos(cos(radians({local_lat})) * cos(radians("LATITUDE")) * \
-            cos(radians({local_long}) - radians("LONGITUDE")) + sin(radians({local_lat})) * sin(radians("LATITUDE")) )) <= 0.5'
+            cos(radians({local_long}) - radians("LONGITUDE")) + sin(radians({local_lat})) * sin(radians("LATITUDE")) )) <= 0.5 LIMIT 1000'
 
     sql_response = xata.sql_query(xquery)
     nx = pd.json_normalize(sql_response['records'])
