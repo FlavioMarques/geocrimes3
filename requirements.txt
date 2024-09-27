@@ -1,0 +1,8 @@
+streamlit~=1.38.0
+xata~=1.3.5
+folium~=0.17.0
+pandas~=2.2.2
+setuptools~=68.2.0
+streamlit-folium~=0.22.0
+st-xatadb-connection~=1.0.3
+geopy~=2.4.1
