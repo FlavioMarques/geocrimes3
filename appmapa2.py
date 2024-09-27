@@ -82,7 +82,7 @@ def init_style():
 
 
 
-@st.cache_data
+#@st.cache_data
 def dados():
     xata = st.connection('xata',type=XataConnection)
 
