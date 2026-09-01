@@ -3,8 +3,7 @@ import pandas as pd
 from folium.plugins import MarkerCluster
 from streamlit_folium import folium_static
 import streamlit as st
-import xata
-from st_xatadb_connection import XataConnection
+from st_supabase_connection import SupabaseConnection
 from geopy.geocoders import Nominatim
 
 # hide_st_style = """
@@ -17,13 +16,13 @@ from geopy.geocoders import Nominatim
 # st.markdown(hide_st_style, unsafe_allow_html=True)
 
 if "latq" in st.query_params:
-    local_lat = st.query_params["latq"]
+    local_lat = float(st.query_params["latq"])
 else:
     st.write("Faltou query params"),
     st.stop()
 
 if "lonq" in st.query_params:
-    local_long = st.query_params["lonq"]
+    local_long = float(st.query_params["lonq"])
 else:
     st.write("Faltou query params"),
     st.stop()
@@ -84,13 +83,13 @@ def init_style():
 
 #@st.cache_data
 def dados():
-    xata = st.connection('xata',type=XataConnection)
-
+    conn = st.connection("supabase", type=SupabaseConnection)
+    
     xquery = colunas + f' FROM "SSPDados" where (6371 * acos(cos(radians({local_lat})) * cos(radians("LATITUDE")) * \
             cos(radians({local_long}) - radians("LONGITUDE")) + sin(radians({local_lat})) * sin(radians("LATITUDE")) )) <= 0.5 LIMIT 1000'
-
-    sql_response = xata.sql_query(xquery)
-    nx = pd.json_normalize(sql_response['records'])
+    
+    sql_response = conn.query(xquery, ttl=600)
+    nx = pd.DataFrame(sql_response)
     return nx
 
 # =======================================================
@@ -127,8 +126,8 @@ def mapa(nx):
                       popup=folium.Popup("<h3>Fatos :</h3> <ul> <li>{0}</li> <li>{1}</li> <li>{2}{3}</li> <li>{4}{5}</li> "
                                          "<li>{6}</li></ul>".format(row['RUBRICA'],
                             row['NATUREZA_APURADA'], row['DATA_OCORRENCIA_BO'][:10], xhora,
-                            row['LOGRADOURO'] + ' ', row['NUMERO_LOGRADOURO'],'<a href="https://www.google.com/maps?layer=c&cbll=' + str(row['LATITUDE']) + ',' + str(row['LONGITUDE']) + '" target="blank">GOOGLE STREET VIEW</a>'
-                                                                    ), parse_html=False, max_width=120)).add_to(marker_cluster)
+                            row['LOGRADOURO'] + ' ', row['NUMERO_LOGRADOURO'],'<a href="https://www.google.com/maps?layer=c&cbll=' + str(row['LATITUDE']) + ',' + str(row['LONGITUDE']) + '" target="_blank">Ver no Maps</a>'),
+                                                                    parse_html=True, max_width=120)).add_to(marker_cluster)
                                                      # row['NOME_MUNICIPIO_CIRCUNSCRIÇÃO'],
                                                      # row['NOME_SECCIONAL_CIRCUNSCRIÇÃO'])).add_to(marker_cluster)
 
@@ -145,4 +144,3 @@ def mapa(nx):
 if __name__ == '__main__':
     init_style()
     main()
-
