@@ -85,7 +85,7 @@ def init_style():
 def dados():
     conn = st.connection("supabase", type=SupabaseConnection)
     
-    xquery = colunas + f' FROM "SSPDados" where (6371 * acos(cos(radians({local_lat})) * cos(radians("LATITUDE")) * \
+    xquery = colunas + f' FROM "geocrimes" where (6371 * acos(cos(radians({local_lat})) * cos(radians("LATITUDE")) * \
             cos(radians({local_long}) - radians("LONGITUDE")) + sin(radians({local_lat})) * sin(radians("LATITUDE")) )) <= 0.5 LIMIT 1000'
     
     sql_response = conn.query(xquery, ttl=600)
